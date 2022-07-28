@@ -8,7 +8,7 @@ import {
   TableCell,
   TableBody
 } from '@mui/material';
-import { useTable, Column, useSortBy } from 'react-table';
+import { useTable, Column } from 'react-table';
 
 export interface IProps<T extends Record<string, unknown>> {
   data: T[];
@@ -20,13 +20,10 @@ export const Table = <T extends Record<string, unknown>>(
 ): ReactElement => {
   const data = useMemo(() => props.data, [props.data]);
   const { columns } = props;
-  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = useTable(
-    {
-      columns,
-      data
-    },
-    useSortBy
-  );
+  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = useTable({
+    columns,
+    data
+  });
   return (
     <TableContainer component={Paper} data-testid="table">
       <MaterialTable {...getTableProps()}>
@@ -40,16 +37,17 @@ export const Table = <T extends Record<string, unknown>>(
           ))}
         </TableHead>
         <TableBody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <TableRow {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
-                })}
-              </TableRow>
-            );
-          })}
+          {rows.length > 0 &&
+            rows.map((row) => {
+              prepareRow(row);
+              return (
+                <TableRow {...row.getRowProps()}>
+                  {row.cells.map((cell) => {
+                    return <TableCell {...cell.getCellProps()}>{cell.render('Cell')}</TableCell>;
+                  })}
+                </TableRow>
+              );
+            })}
         </TableBody>
       </MaterialTable>
     </TableContainer>
