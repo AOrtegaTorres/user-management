@@ -5,6 +5,6 @@ export type User = {
   emailId: string;
 };
 
-export type UserList = {
+export type UserState = {
   userList: User[];
 };
