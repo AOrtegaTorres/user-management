@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { useNavigate } from 'react-router-dom';
+import ReactImageUploading from 'react-images-uploading';
 import {
   Box,
   Container,
@@ -8,7 +9,8 @@ import {
   Grid,
   Paper,
   TextField,
-  Button as MuiButton
+  Button as MuiButton,
+  Button
 } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../../store/users';
@@ -17,11 +19,18 @@ import { User } from '../../types/user';
 const required = (value: User) => (value ? undefined : 'Required');
 
 export const CreateUser = () => {
+  const [image, setImage] = useState<any[]>([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const onSubmit = (values: User) => {
-    dispatch(addUser(values));
+    console.log(image);
+    const user = { ...values, avatar: image[0].data_url };
+    dispatch(addUser(user));
     navigate('/');
+  };
+
+  const onChange = (img: any) => {
+    setImage(img);
   };
 
   return (
@@ -37,17 +46,32 @@ export const CreateUser = () => {
               <Grid container alignItems="flex-start" spacing={12}>
                 <Grid item xs={12}>
                   <Field fullWidth name="avatar">
-                    {(props) => (
-                      <MuiButton variant="contained" component="label">
-                        <input
-                          type="file"
-                          hidden
-                          name={props.input.name}
-                          onChange={props.input.onChange}
-                          value={props.input.value}
-                        />
-                        Upload Avatar
-                      </MuiButton>
+                    {() => (
+                      <ReactImageUploading
+                        multiple
+                        value={image}
+                        onChange={onChange}
+                        maxNumber={1}
+                        dataURLKey="data_url"
+                      >
+                        {({ imageList, onImageUpdate, onImageRemove, onImageUpload }) => (
+                          // write your building UI
+                          <div>
+                            <Button variant="contained" onClick={onImageUpload}>
+                              Upload
+                            </Button>
+                            {imageList.map((img: any, index: number) => (
+                              <div key={index}>
+                                <img src={img.data_url} alt="" width="100" />
+                                <div>
+                                  <Button onClick={() => onImageUpdate(index)}>Update</Button>
+                                  <Button onClick={() => onImageRemove(index)}>Remove</Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </ReactImageUploading>
                     )}
                   </Field>
                 </Grid>

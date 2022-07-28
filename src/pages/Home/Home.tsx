@@ -16,6 +16,7 @@ export const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const editUserNavigate = (values: any) => {
     navigate(`edit-user/${values.emailId}}`);
   };
@@ -24,7 +25,11 @@ export const Home = () => {
     () => [
       {
         Header: 'Avatar',
-        accessor: 'avatar'
+        accessor: 'avatar',
+        Cell: (props) => {
+          const avatar = props.value ? props.value : '/avatar.png';
+          return <img width={100} src={avatar} />;
+        }
       },
       {
         Header: 'First Name',
@@ -51,7 +56,7 @@ export const Home = () => {
         }
       }
     ],
-    []
+    [dispatch, editUserNavigate]
   );
 
   const handlerClick = () => {
