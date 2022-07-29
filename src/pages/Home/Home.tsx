@@ -7,8 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
-import { selectUsers } from '../../store';
-import { deleteUser } from '../../store/users';
+import { deleteUser, selectUsers } from '../../store/users';
 import { User } from '../../types/user';
 
 export const Home = () => {
@@ -18,7 +17,7 @@ export const Home = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const editUserNavigate = (values: any) => {
-    navigate(`edit-user/${values.emailId}}`);
+    navigate(`edit-user/${values.emailId}`);
   };
 
   const columns: readonly Column<object>[] = useMemo(
@@ -46,7 +45,7 @@ export const Home = () => {
       {
         Header: 'Actions',
         Cell: (props) => {
-          const rowId = props.data[0] as User;
+          const rowId = props.row.values as User;
           return (
             <>
               <EditIcon color="primary" onClick={() => editUserNavigate(rowId)} />

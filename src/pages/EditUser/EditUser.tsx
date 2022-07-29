@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Form, Field } from 'react-final-form';
-import { useNavigate } from 'react-router-dom';
 import ReactImageUploading from 'react-images-uploading';
 import {
   Box,
@@ -12,26 +13,33 @@ import {
   Button as MuiButton,
   Button
 } from '@mui/material';
-import { useDispatch } from 'react-redux';
-import { addUser } from '../../store/users';
 import { User } from '../../types/user';
 import { emailValidator } from '../../utils';
+import { selectUsers, updateUser } from '../../store/users';
 
 type Error = {
   emailId?: string;
 };
 const required = (value: User) => (value ? undefined : 'Required');
 
-export const CreateUser = () => {
-  const [image, setImage] = useState<any[]>([]);
-  const navigate = useNavigate();
+export const EditUser = () => {
+  const { id } = useParams();
+  const users = useSelector(selectUsers);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  let user: { firstName: any; avatar?: string | undefined; lastName: any; emailId: any };
+  const [image, setImage] = useState<any[]>([]);
   const onSubmit = (values: User) => {
-    const newImage = image[0]?.data_url ?? '';
-    const user = { ...values, avatar: newImage };
-    dispatch(addUser(user));
+    const newImage = image[0]?.data_url ?? user?.avatar;
+    const updatedUser = { ...values, avatar: newImage };
+    dispatch(updateUser(updatedUser));
     navigate('/');
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    user = users.filter((u) => u.emailId === id)[0];
+  }, []);
 
   const onChange = (img: any) => {
     setImage(img);
@@ -40,7 +48,7 @@ export const CreateUser = () => {
   return (
     <Container>
       <Box sx={{ padding: '20px 0px' }}>
-        <Typography variant="h6">Create User Form</Typography>
+        <Typography variant="h6">Edit User</Typography>
       </Box>
       <Form
         onSubmit={onSubmit}
@@ -50,7 +58,7 @@ export const CreateUser = () => {
           else if (!emailValidator(values.emailId)) errors.emailId = 'Invalid Email';
           return errors;
         }}
-        render={({ handleSubmit, form, pristine, submitting }) => (
+        render={({ handleSubmit, form }) => (
           <form onSubmit={handleSubmit}>
             <Paper style={{ padding: 16 }}>
               <Grid container alignItems="flex-start" spacing={12}>
@@ -66,16 +74,32 @@ export const CreateUser = () => {
                       >
                         {({ imageList, onImageUpdate, onImageRemove, onImageUpload }) => (
                           <div>
-                            <Button variant="contained" onClick={onImageUpload}>
-                              Upload
-                            </Button>
+                            <Grid item>
+                              {user?.avatar && <img width="100" src={user?.avatar} />}
+                            </Grid>
+                            <Grid>
+                              {image.length < 1 && (
+                                <Button variant="contained" onClick={onImageUpload}>
+                                  Update
+                                </Button>
+                              )}
+                            </Grid>
                             {imageList.map((img: any, index: number) => (
                               <div key={index}>
                                 <img src={img.data_url} alt="" width="100" />
-                                <div>
-                                  <Button onClick={() => onImageUpdate(index)}>Update</Button>
-                                  <Button onClick={() => onImageRemove(index)}>Remove</Button>
-                                </div>
+                                <Grid item>
+                                  <Button variant="contained" onClick={() => onImageUpdate(index)}>
+                                    Update
+                                  </Button>
+                                  <Button
+                                    sx={{ marginLeft: 2 }}
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => onImageRemove(index)}
+                                  >
+                                    Remove
+                                  </Button>
+                                </Grid>
                               </div>
                             ))}
                           </div>
@@ -85,7 +109,12 @@ export const CreateUser = () => {
                   </Field>
                 </Grid>
                 <Grid item xs={12} md={6} lg={6} style={{ paddingTop: '50px' }}>
-                  <Field fullWidth name="firstName" validate={required}>
+                  <Field
+                    fullWidth
+                    name="firstName"
+                    validate={required}
+                    defaultValue={user?.firstName}
+                  >
                     {({ input, meta }) => (
                       <TextField
                         fullWidth
@@ -98,7 +127,12 @@ export const CreateUser = () => {
                   </Field>
                 </Grid>
                 <Grid item xs={12} md={6} lg={6} style={{ paddingTop: '50px' }}>
-                  <Field fullWidth name="lastName" validate={required}>
+                  <Field
+                    fullWidth
+                    name="lastName"
+                    validate={required}
+                    defaultValue={user?.lastName}
+                  >
                     {({ input, meta }) => (
                       <TextField
                         fullWidth
@@ -111,26 +145,13 @@ export const CreateUser = () => {
                   </Field>
                 </Grid>
                 <Grid item xs={12} style={{ paddingTop: '50px' }}>
-                  <Field fullWidth name="emailId">
-                    {({ input, meta }) => (
-                      <TextField
-                        fullWidth
-                        label="Email"
-                        {...input}
-                        error={meta?.error && meta.touched && meta?.error}
-                        helperText={meta?.error && meta.touched && meta?.error}
-                      />
-                    )}
+                  <Field fullWidth name="emailId" defaultValue={user?.emailId}>
+                    {({ input }) => <TextField fullWidth disabled label="Email" {...input} />}
                   </Field>
                 </Grid>
                 <Grid item style={{ paddingTop: '50px' }}>
-                  <MuiButton
-                    disabled={pristine || submitting}
-                    type="submit"
-                    variant="contained"
-                    onClick={handleSubmit}
-                  >
-                    Save
+                  <MuiButton type="submit" variant="contained" onClick={handleSubmit}>
+                    Update
                   </MuiButton>
                 </Grid>
                 <Grid item style={{ paddingTop: '50px' }}>
